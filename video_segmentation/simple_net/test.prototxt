@@ -1,0 +1,12 @@
+train_net: 2
+display: 20
+average_loss: 20
+2
+momentum: 2
+iter_size: 5
+max_iter: 2
+weight_decay: 2
+snapshot: 2
+snapshot_prefix: 2
+
+#reduce(lambda x, y: x.replace(y, dict[y]), dict, s)

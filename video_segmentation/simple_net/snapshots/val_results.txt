@@ -1,0 +1,4 @@
+davis_simple_iter_500*20		0.237327950227	
+davis_simple_iter_250*20		0.236008786726
+davis_sequence_simple_iter_4192*4	0.132974879242	max_len 10
+davis_sequence_simple_iter_4199*4	0.119035758078	max_len 20

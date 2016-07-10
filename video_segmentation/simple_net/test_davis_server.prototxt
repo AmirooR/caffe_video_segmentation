@@ -1,0 +1,24 @@
+layer {
+  name: "cur_im"
+  type: "Python"
+  top: "cur_im"
+  top: "masked_im"
+  top: "next_im"
+  top: "label"
+  python_param {
+    module: "davis_datalayer_server"
+    layer: "DavisDataLayerServer"
+    param_str: "{\'im_shape\': (256, 256), \'split\': \'training\', \'batch_size\': 4, \'port\': \'6678\'}"
+  }
+}
+layer {
+  name: "client"
+  type: "Python"
+  bottom: "label"
+  python_param {
+    module: "davis_datalayer_client"
+    layer: "DavisDataLayerClient"
+    param_str: "{\'port\': \'6678\'}"
+  }
+}
+

@@ -1,0 +1,13 @@
+train_net: "train_davis_fcn8.prototxt"
+display: 20
+average_loss: 20
+base_lr: 1e-05
+lr_policy: "step"
+gamma: .1
+stepsize: 1666
+momentum: 0.9
+iter_size: 1
+max_iter: 16666
+weight_decay: 0.0005
+snapshot: 833
+snapshot_prefix: "./snapshots/davis_fcn8"

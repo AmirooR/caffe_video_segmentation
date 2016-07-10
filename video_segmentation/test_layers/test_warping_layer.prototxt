@@ -1,0 +1,27 @@
+name: "Test_Warping_Layer"
+
+input: "data"
+input_dim: 1
+input_dim: 3
+input_dim: 10
+input_dim: 10
+
+input: "disp"
+input_dim: 1
+input_dim: 2
+input_dim: 10
+input_dim: 10
+
+
+layer {
+  name: "flow_warping"
+  type: "FlowWarping"
+  bottom: "data"
+  bottom: "disp"
+  top: "data_i"
+  top: "data_j"
+  top: "sign_i"
+  top: "sign_j"
+  top: "indices"
+  top: "ptrs"
+}

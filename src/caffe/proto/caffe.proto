@@ -403,6 +403,8 @@ message LayerParameter {
   optional ThresholdParameter threshold_param = 128;
   optional TileParameter tile_param = 138;
   optional WindowDataParameter window_data_param = 129;
+  
+  optional MultiStageMeanfieldParameter multi_stage_meanfield_param = 9999;
 }
 
 // Message that stores parameters used to apply transformation
@@ -1396,4 +1398,24 @@ message PReLUParameter {
   optional FillerParameter filler = 1;
   // Whether or not slope paramters are shared across channels.
   optional bool channel_shared = 2 [default = false];
+}
+
+// Message that stores parameters used by MultiStageMeanfieldLayer
+message MultiStageMeanfieldParameter {
+  enum Mode {
+    POTTS = 0;
+  }
+  optional Mode compatibility_mode = 1 [default = POTTS];
+  optional float threshold = 2;
+  
+  required float theta_alpha = 3 [default = 10.];
+  required float theta_beta = 4 [default = 10.];
+  required float theta_gamma = 5 [default = 10.];
+  
+  required uint32 num_iterations = 6 [default = 1];
+  optional float spatial_filter_weight = 7 [default = 1];
+  optional float bilateral_filter_weight = 8 [default = 1];
+  
+  optional float forced_spatial_filter_weight = 9;
+  optional float forced_bilateral_filter_weight = 10;
 }

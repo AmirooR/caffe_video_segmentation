@@ -1,0 +1,13 @@
+train_net: "$TRAIN_NET"
+display: 20
+average_loss: 20
+base_lr: $BASE_LR
+lr_policy: "step"
+gamma: .1
+stepsize: $STEP_SIZE
+momentum: $MOMENTUM
+iter_size: $ITER_SIZE
+max_iter: $MAX_ITER
+weight_decay: $WEIGHT_DECAY
+snapshot: $SNAPSHOT
+snapshot_prefix: "$SNAPSHOT_PREFIX"

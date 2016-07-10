@@ -12,7 +12,7 @@ from caffe import layers as L
 PASS_THROUGH_LAYERS = ['AbsVal', 'BatchNorm', 'Bias', 'BNLL', 'Dropout',
                        'Eltwise', 'ELU', 'Log', 'LRN', 'Exp', 'MVN', 'Power',
                        'ReLU', 'PReLU', 'Scale', 'Sigmoid', 'Split', 'TanH',
-                       'Threshold']
+                       'Threshold', 'Concat']
 
 
 def conv_params(fn):
