@@ -25,6 +25,15 @@ void tracker_gpu_toInt(int n, const Dtype* in, int* out);
 
 template <typename Dtype>
 void tracker_gpu_toDtype(int n, const int* in, Dtype* out);
+
+    
+template<typename Dtype>
+void tracker_gpu_csr_gemm_cusparse(const CBLAS_TRANSPOSE TransA,
+                          const CBLAS_TRANSPOSE TransB, const int M, const int N,
+                          const int K, const Dtype alpha, int nzz, const Dtype* A,
+                          const int* indices, const int* ptr, const Dtype* B,
+                          const Dtype beta, Dtype* C, const CBLAS_ORDER orderC);
+
 }  // namespace caffe
 
 #endif  // CAFFE_UTIL_MATH_FUNCTIONS_H_
