@@ -32,7 +32,7 @@ class FlowWarpingLayer : public Layer<Dtype> {
   virtual inline const char* type() const { return "FlowWarping"; }
 
   virtual inline int ExactNumBottomBlobs() const { return 2; }
-  virtual inline int ExactNumTopBlobs() const { return 6; }
+  virtual inline int ExactNumTopBlobs() const { return 1; }
 
  protected:
   virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
@@ -52,8 +52,9 @@ class FlowWarpingLayer : public Layer<Dtype> {
   Blob<Dtype> sign_i_;
   Blob<Dtype> data_j_;
   Blob<Dtype> sign_j_;
-  Blob<int> indices;
-  Blob<int> ptrs;
+  Blob<Dtype> data_ij_;
+  Blob<int> indices_blob_;
+  Blob<int> ptrs_blob_;
 
 };
 

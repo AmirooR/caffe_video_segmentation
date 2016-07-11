@@ -41,22 +41,22 @@ void FlowWarpingLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom, const 
   size_ptrs.push_back(bottom[0]->num());
   size_ptrs.push_back(width_ * height_ + 1);
   
+  //data_ij
+  data_ij_.Reshape(size);
   //data_i
-  top[0]->Reshape(size);
+  data_i_.Reshape(size);
   //data_j
-  top[1]->Reshape(size);
+  data_j_.Reshape(size);
   //sign_i
-  top[2]->Reshape(size);
+  sign_i_.Reshape(size);
   //sign_j
-  top[3]->Reshape(size);
+  sign_j_.Reshape(size);
   //indices
-  top[4]->Reshape(size);
+  indices_blob_.Reshape(size);
   //ptrs
-  top[5]->Reshape(size_ptrs);
+  ptrs_blob_.Reshape(size_ptrs);
 
-
-
-
+  top[0]->ReshapeLike(*bottom[0]);
 }
 
 template <typename Dtype>
