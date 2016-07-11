@@ -71,13 +71,14 @@ void tracker_gpu_csr_gemm_cusparse<float>(const CBLAS_TRANSPOSE TransA,
   int ksparse = (TransA == CblasNoTrans) ? K : M;
   
   bool reuiqre_transpose_A = (cuTransA == CUSPARSE_OPERATION_TRANSPOSE) && (cuTransB == CUSPARSE_OPERATION_TRANSPOSE);
+  //LOG(ERROR) << "Require Transpose A? " << reuiqre_transpose_A;
   if (reuiqre_transpose_A){
     CUDA_CHECK(cudaMalloc((void**)&A_t, sizeof(float)*nzz));
     CUDA_CHECK(cudaMalloc((int**)&A_t_indices, sizeof(int)*nzz));
     CUDA_CHECK(cudaMalloc((int**)&A_t_ptr, sizeof(int)*(ksparse+1)));
     CUSPARSE_CHECK(cusparseScsr2csc(Caffe::cusparse_handle(), msparse, ksparse, nzz, A, ptr, indices, A_t, A_t_indices, A_t_ptr, CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO));
   }
-
+  
   if (orderC == CblasRowMajor){
     float* Ct;
     CUDA_CHECK(cudaMalloc((void**)&Ct, sizeof(float)*M*N));
@@ -94,6 +95,7 @@ void tracker_gpu_csr_gemm_cusparse<float>(const CBLAS_TRANSPOSE TransA,
     CUBLAS_CHECK(cublasSgeam(Caffe::cublas_handle(), CUBLAS_OP_T , CUBLAS_OP_N, N, M, &one, Ct, M, &beta, C, N, C, N));
     CUDA_CHECK(cudaFree(Ct));
   }else{
+      
     //this is the default of CUSPARSE by the Matrix B is by default rowmajor
     if (reuiqre_transpose_A){
       CUSPARSE_CHECK(cusparseScsrmm2(Caffe::cusparse_handle(), CUSPARSE_OPERATION_NON_TRANSPOSE, cuTransB, ksparse, N, msparse,nzz, &alpha, Caffe::cusparse_mat_descr(), A_t, A_t_ptr, A_t_indices, B,  ldb, &beta, C, M));      
@@ -101,6 +103,7 @@ void tracker_gpu_csr_gemm_cusparse<float>(const CBLAS_TRANSPOSE TransA,
       CUDA_CHECK(cudaFree(A_t_indices));
       CUDA_CHECK(cudaFree(A_t_ptr));
     }else{
+      //LOG(ERROR) << "HERE!!!! " << (cuTransA == CUSPARSE_OPERATION_TRANSPOSE) << ", " << (cuTransB == CUSPARSE_OPERATION_TRANSPOSE) << ", " << msparse << ", " << N << ", " << ksparse << ", " << nzz << ", " << ldb << ", " << M;
       CUSPARSE_CHECK(cusparseScsrmm2(Caffe::cusparse_handle(), cuTransA, cuTransB, msparse, N, ksparse,nzz, &alpha, Caffe::cusparse_mat_descr(), A, ptr, indices, B,  ldb, &beta, C, M));
     }
   }

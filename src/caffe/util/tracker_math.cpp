@@ -38,5 +38,6 @@ void tracker_saveMat(string filename, const Dtype* mat, int col, int count) {
 
 template void tracker_saveMat<float>(string filename, const float* mat, int col, int count);
 template void tracker_saveMat<double>(string filename, const double* mat, int col, int count);
+template void tracker_saveMat<int>(string filename, const int* mat, int col, int count);
             
 }  // namespace caffe

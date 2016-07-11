@@ -48,19 +48,13 @@ class FlowWarpingLayer : public Layer<Dtype> {
   int height_;
   int width_;
 
-  Blob<Dtype> data_i_;
-  Blob<Dtype> sign_i_;
-  Blob<Dtype> data_j_;
-  Blob<Dtype> sign_j_;
-  Blob<Dtype> data_ij_;
+  Blob<Dtype> partial_i_blob_;
+  Blob<Dtype> partial_j_blob_;
+  Blob<Dtype> interp_coefs_blob_;
   Blob<int> indices_blob_;
   Blob<int> ptrs_blob_;
-
+  Blob<Dtype> ones_blob_;
 };
-
-
-
-
 
 }  // namespace caffe
 
