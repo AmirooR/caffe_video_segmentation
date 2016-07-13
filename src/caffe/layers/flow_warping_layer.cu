@@ -12,12 +12,6 @@ __device__ void is_free(const int i, const int* nn_ids, int* free_indices, int& 
     }
 }
 
-// 12, 0, 13, 1
-// 0, 1, 2, 3
-// 1, 0, 3, 2 -- 1, 0, 3, 2 
-
-// 2, 0,  3, 1
-// 1,3,0,2
 __device__ void sort4(const int* in_num, int* inverse_map) {
     int forward_map[4] = {0,1,2,3};
     
@@ -61,7 +55,7 @@ __device__ void sort4(const int* in_num, int* inverse_map) {
     inverse_map[forward_map[3]] = 3;
 }
 __device__ void find_nns(const int r, const int c, int* nn_ids, int* inverse_map, bool* is_valid, int w, int h) { 
-    
+
     is_valid[0] = 0 <= r && r < h && 0 <= c && c < w;
     is_valid[1] = 0 <= r && r < h && 0 <= c+1 && c+1 < w;
     is_valid[2] = 0 <= r+1 && r+1 < h && 0 <= c && c < w;
@@ -71,15 +65,11 @@ __device__ void find_nns(const int r, const int c, int* nn_ids, int* inverse_map
     nn_ids[1] = nn_ids[0] + 1;
     nn_ids[2] = nn_ids[0] + w;
     nn_ids[3] = nn_ids[2] + 1;
-    
-    //Is that necessary
-    //if(is_valid[0] && is_valid[1] && is_valid[2] && is_valid[3]) {
-	//nn_order[0] = 0;
-	//nn_order[1] = 1;
-	//nn_order[2] = 2;
-	//nn_order[3] = 3;
-	//return;
-    //}
+
+    //Is that necessary?
+    if(is_valid[0] && is_valid[1] && is_valid[2] && is_valid[3]) {
+        return;
+    }
     //For nns that do not have a valid location, we still should assign a unique id to be able to make
     //the sparse matrix. As long as the correspoing data is set to zero the result won't change.
     //We choose among id = {0,1,2,3} whichever are not taken.
@@ -89,29 +79,29 @@ __device__ void find_nns(const int r, const int c, int* nn_ids, int* inverse_map
     is_free(1, nn_ids, free_indx, cur_index);
     is_free(2, nn_ids, free_indx, cur_index);
     is_free(3, nn_ids, free_indx, cur_index);
-    
+
     //Assigning free sptos
     cur_index = 0;
     if(!is_valid[0]) {
-	nn_ids[0] = free_indx[cur_index];
-	cur_index++;
+        nn_ids[0] = free_indx[cur_index];
+        cur_index++;
     }
-	
+
     if(!is_valid[1]) {
-	nn_ids[1] = free_indx[cur_index];
-	cur_index++;
+        nn_ids[1] = free_indx[cur_index];
+        cur_index++;
     }
-    
+
     if(!is_valid[2]) {
-	nn_ids[2] = free_indx[cur_index];
-	cur_index++;
+        nn_ids[2] = free_indx[cur_index];
+        cur_index++;
     }
-    
+
     if(!is_valid[3]) {
-	nn_ids[3] = free_indx[cur_index];
-	cur_index++;
+        nn_ids[3] = free_indx[cur_index];
+        cur_index++;
     }
-    
+
     //Choose the order so that nn_ids[nn_order[.]] is sorted
     sort4(nn_ids, inverse_map);
 } 
@@ -131,8 +121,8 @@ __global__ void FlowWarpingBilinearCoefs(const int nthreads, Dtype* bi_coefs, Dt
         Dtype x = disp[w * h + index] + j;
         int r = (int) y;
         int c = (int) x;
-        Dtype rem_x = y - r;
-        Dtype rem_y = x - c;
+        Dtype rem_x = x - c;
+        Dtype rem_y = y - r;
         Dtype rem_1x = 1 - rem_x;
         Dtype rem_1y = 1 - rem_y;
 
@@ -208,7 +198,7 @@ void FlowWarpingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   caffe_gpu_set(partial_i_blob_.count(), (Dtype) 0.0, partial_i);
   caffe_gpu_set(partial_j_blob_.count(), (Dtype) 0.0, partial_j);
   caffe_gpu_set(interp_coefs_blob_.count(), (Dtype) 0.0, interp_coefs);
-  caffe_gpu_set(indices_blob_.count(), (int) -1, indices);
+  caffe_gpu_set(indices_blob_.count(), (int) 0, indices);
   caffe_gpu_set(ptrs_blob_.count(), (int) 0, ptrs);
 
   for(int i = 0; i < top[0]->num(); i++) {
@@ -259,13 +249,15 @@ LOG(ERROR) << "IN BACKWARD";
   
   
   const Dtype* input_im = bottom[0]->gpu_data();
-  const Dtype* ones = ones_blob_.gpu_data();
+  Dtype* ones = ones_blob_.mutable_gpu_data();
   const Dtype* partial_i = partial_i_blob_.gpu_data();
   const Dtype* partial_j = partial_j_blob_.gpu_data();
   const Dtype* interp_coefs = interp_coefs_blob_.gpu_data();
   const int* indices = indices_blob_.gpu_data();
   const int* ptrs = ptrs_blob_.gpu_data();
   const int count = width_ * height_;
+
+  caffe_gpu_set(channels_, (Dtype) 1.0, ones);
   for(int i = 0; i < top[0]->num(); i++) {
       if(propagate_down[1]) {
       	//Let z' = d out_{c,i,j}/d disp_{0, i,j}: 
@@ -274,11 +266,13 @@ LOG(ERROR) << "IN BACKWARD";
       	tracker_gpu_csr_gemm_cusparse(CblasNoTrans, CblasTrans, count, channels_,
         		      count, (Dtype) 1.0 , count * 4, partial_i, indices, ptrs,
         		      input_im, (Dtype) 0.0, im_diff, CblasColMajor);
+
+
         //disp_{0}' = sum(z' .* top_diff, 0) 
         caffe_gpu_mul(count * channels_, im_diff, top_diff, im_diff);
         
         //sum(.,0)
-        caffe_gpu_gemm(CblasNoTrans, CblasNoTrans, 1, count, channels_,
+        caffe_gpu_gemm(CblasTrans, CblasNoTrans, count, 1, channels_,
         		(Dtype) 1.0, im_diff, ones, (Dtype) 0.0, disp_diff);
         
        
@@ -288,10 +282,10 @@ LOG(ERROR) << "IN BACKWARD";
         		      input_im, (Dtype) 0.0, im_diff, CblasColMajor);
 
         caffe_gpu_mul(count * channels_, im_diff, top_diff, im_diff);
-        caffe_gpu_gemm(CblasNoTrans, CblasNoTrans, 1, count, channels_,
+        caffe_gpu_gemm(CblasTrans, CblasNoTrans, count, 1, channels_,
         		(Dtype) 1.0, im_diff, ones, (Dtype) 0.0, disp_diff + count);
         
-      }      
+      }
       
       //out = in * A^t ==> in' = out' * A = (A^t * out'^t)^t
   	  tracker_gpu_csr_gemm_cusparse(CblasTrans, CblasTrans, count, channels_,
@@ -310,9 +304,6 @@ LOG(ERROR) << "IN BACKWARD";
       indices += count * 4;
       ptrs += count + 1;
   }
-  
-
-
 }
   
 INSTANTIATE_LAYER_GPU_FUNCS(FlowWarpingLayer);
