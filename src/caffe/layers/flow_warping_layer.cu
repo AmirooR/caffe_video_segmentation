@@ -66,7 +66,7 @@ __device__ void find_nns(const int r, const int c, int* nn_ids, int* inverse_map
     nn_ids[2] = nn_ids[0] + w;
     nn_ids[3] = nn_ids[2] + 1;
 
-    //Is that necessary?
+    //Is this necessary?
     if(is_valid[0] && is_valid[1] && is_valid[2] && is_valid[3]) {
         return;
     }

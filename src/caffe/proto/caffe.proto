@@ -404,6 +404,9 @@ message LayerParameter {
   optional TileParameter tile_param = 138;
   optional WindowDataParameter window_data_param = 129;
   
+  
+  optional DownsampleParameter downsample_param = 9997;
+  optional L1LossParameter l1_loss_param = 9998;
   optional MultiStageMeanfieldParameter multi_stage_meanfield_param = 9999;
 }
 
@@ -1418,4 +1421,18 @@ message MultiStageMeanfieldParameter {
   
   optional float forced_spatial_filter_weight = 9;
   optional float forced_bilateral_filter_weight = 10;
+}
+
+// Message that stores parameters used by L1LossLayer
+message L1LossParameter {
+  optional bool l2_per_location = 1 [default = false];
+  optional bool l2_prescale_by_channels = 2 [default = false]; // Old style
+  optional bool normalize_by_num_entries = 3 [default = false]; // if we want to normalize not by batch size, but by the number of non-NaN entries
+  optional float epsilon = 4 [default = 1e-2]; // constant for smoothing near zero
+  optional float plateau = 3001 [default = 0]; // L1 Errors smaller than plateau-value will result in zero loss and no gradient
+}
+
+message DownsampleParameter {
+  optional uint32 top_height = 1 [default = 0]; // The output height
+  optional uint32 top_width = 2 [default = 0]; // The output width
 }
